@@ -6,318 +6,376 @@
     <title>HOJA CLÍNICA - Evaluación Integral del Paciente</title>
     <!-- Librería para generación de PDF directo desde la web -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #1a365d;
-            --secondary-color: #2b6cb0;
-            --bg-color: #f7fafc;
-            --card-bg: #ffffff;
-            --border-color: #cbd5e0;
-            --text-color: #2d3748;
-            --accent-color: #3182ce;
-        }
+<style>
+    :root {
+        --primary-color: #1a365d;
+        --secondary-color: #2b6cb0;
+        --bg-color: #f7fafc;
+        --card-bg: #ffffff;
+        --border-color: #cbd5e0;
+        --text-color: #2d3748;
+        --accent-color: #3182ce;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    body {
+        background-color: #e2e8f0;
+        color: var(--text-color);
+        padding: 15px;
+        font-size: 11px;
+    }
+
+    .container {
+        max-width: 1000px;
+        width: 100%;
+        margin: 0 auto;
+        background-color: var(--card-bg);
+        padding: 18px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Header Styles */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        gap: 10px;
+    }
+
+    .logo-box {
+        width: 160px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        text-align: center;
+        font-size: 11px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .header-title {
+        text-align: center;
+    }
+
+    .header-title h1 {
+        font-size: 20px;
+        color: var(--primary-color);
+        letter-spacing: 1.5px;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        font-size: 10px;
+        color: #4a5568;
+        font-weight: 600;
+        margin-top: 2px;
+        text-transform: uppercase;
+    }
+
+    /* System Grid Responsive */
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .col-12 { width: 100%; }
+    .col-8  { width: calc(66.666% - 5.33px); }
+    .col-7  { width: calc(58.333% - 5.33px); }
+    .col-6  { width: calc(50% - 4px); }
+    .col-5  { width: calc(41.666% - 5.33px); }
+    .col-4  { width: calc(33.333% - 5.33px); }
+    .col-3  { width: calc(25% - 6px); }
+
+    /* Card Section Styling */
+    .section-card {
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        overflow: hidden;
+        background-color: #fff;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .section-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 4px 8px;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .section-number {
+        background-color: white;
+        color: var(--primary-color);
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        font-weight: bold;
+    }
+
+    .section-body {
+        padding: 8px;
+        flex-grow: 1;
+    }
+
+    /* Form Controls */
+    .form-group {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #4a5568;
+        white-space: nowrap;
+        font-size: 10px;
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+        width: 100%;
+        padding: 3px 6px;
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        font-size: 10px;
+        transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+    }
+
+    .checkbox-group, .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .checkbox-item, .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        cursor: pointer;
+        font-size: 10px;
+    }
+
+    /* Scale EVA */
+    .eva-scale {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px 0;
+        background: #f7fafc;
+        padding: 5px;
+        border-radius: 4px;
+        overflow-x: auto;
+    }
+
+    .eva-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 9px;
+    }
+
+    .eva-color {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .c-0 { background-color: #38a169; }
+    .c-2 { background-color: #68d391; }
+    .c-4 { background-color: #f6e05e; }
+    .c-6 { background-color: #ed8936; }
+    .c-8 { background-color: #e53e3e; }
+    .c-10 { background-color: #9b2c2c; }
+
+    /* Human Body Map & Checklist Layout */
+    .body-map-container {
+        display: flex;
+        gap: 10px;
+    }
+
+    .body-svg {
+        width: 90px;
+        height: 130px;
+        flex-shrink: 0;
+        border: 1px solid #edf2f7;
+        border-radius: 4px;
+        background-color: #fafafa;
+    }
+
+    .checklist-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3px 8px;
+        width: 100%;
+    }
+
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9.5px;
+    }
+
+    th, td {
+        border: 1px solid var(--border-color);
+        padding: 3px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #edf2f7;
+        color: #2d3748;
+        font-weight: 600;
+    }
+
+    td.text-left { text-align: left; }
+
+    textarea {
+        resize: vertical;
+        min-height: 40px;
+    }
+
+    /* Footer */
+    .footer {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 15px;
+    }
+
+    .disclaimer {
+        font-size: 8.5px;
+        color: #718096;
+        max-width: 60%;
+    }
+
+    .signature-box {
+        width: 200px;
+        text-align: center;
+    }
+
+    .signature-line {
+        border-bottom: 1px solid #2d3748;
+        margin-bottom: 3px;
+        height: 25px;
+    }
+
+    .btn-submit {
+        background-color: #2b6cb0;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        font-size: 13px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 12px;
+        width: 100%;
+    }
+
+    .btn-submit:hover {
+        background-color: #2c5282;
+    }
+
+    /* MEDIA QUERIES PARA DISPOSITIVOS MÓVILES */
+    @media screen and (max-width: 768px) {
         body {
-            background-color: #e2e8f0;
-            color: var(--text-color);
-            padding: 15px;
-            font-size: 11px;
+            padding: 5px;
         }
 
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--card-bg);
-            padding: 18px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 10px;
         }
 
-        /* Header Styles */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
-
-        .logo-box {
-            width: 160px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            flex-direction: column;
             text-align: center;
-            font-size: 11px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .header-title {
-            text-align: center;
-        }
-
-        .header-title h1 {
-            font-size: 20px;
-            color: var(--primary-color);
-            letter-spacing: 1.5px;
-            font-weight: 800;
-        }
-
-        .header-title p {
-            font-size: 10px;
-            color: #4a5568;
-            font-weight: 600;
-            margin-top: 2px;
-            text-transform: uppercase;
-        }
-
-        /* Layout Layout */
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
             gap: 8px;
         }
 
-        .col-12 { width: 100%; }
-        .col-8 { width: calc(66.666% - 5.33px); }
-        .col-7 { width: calc(58.333% - 5.33px); }
-        .col-6 { width: calc(50% - 4px); }
-        .col-5 { width: calc(41.666% - 5.33px); }
-        .col-4 { width: calc(33.333% - 5.33px); }
-        .col-3 { width: calc(25% - 6px); }
-
-        /* Card Section Styling */
-        .section-card {
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            overflow: hidden;
-            background-color: #fff;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
+        /* Fuerza a que todas las columnas de la grilla ocupen el 100% de ancho */
+        .col-8, .col-7, .col-6, .col-5, .col-4, .col-3 {
+            width: 100% !important;
         }
 
-        .section-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .section-number {
-            background-color: white;
-            color: var(--primary-color);
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: bold;
-        }
-
-        .section-body {
-            padding: 8px;
-            flex-grow: 1;
-        }
-
-        /* Form Controls */
         .form-group {
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        .form-group label {
-            font-weight: 600;
-            color: #4a5568;
-            white-space: nowrap;
-            font-size: 10px;
-        }
-
-        input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
-            width: 100%;
-            padding: 3px 6px;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-            font-size: 10px;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
-        }
-
-        .checkbox-group, .radio-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .checkbox-item, .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            cursor: pointer;
-            font-size: 10px;
-        }
-
-        /* Scale EVA */
-        .eva-scale {
-            display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-            background: #f7fafc;
-            padding: 5px;
-            border-radius: 4px;
-        }
-
-        .eva-option {
-            display: flex;
+        .body-map-container {
             flex-direction: column;
             align-items: center;
-            gap: 2px;
-            font-size: 9px;
         }
 
-        .eva-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .c-0 { background-color: #38a169; }
-        .c-2 { background-color: #68d391; }
-        .c-4 { background-color: #f6e05e; }
-        .c-6 { background-color: #ed8936; }
-        .c-8 { background-color: #e53e3e; }
-        .c-10 { background-color: #9b2c2c; }
-
-        /* Human Body Map & Checklist Layout */
-        .body-map-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .body-svg {
-            width: 90px;
-            height: 130px;
-            flex-shrink: 0;
-            border: 1px solid #edf2f7;
-            border-radius: 4px;
-            background-color: #fafafa;
-        }
-
-        .checklist-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3px 8px;
-            width: 100%;
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 9.5px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 3px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #edf2f7;
-            color: #2d3748;
-            font-weight: 600;
-        }
-
-        td.text-left { text-align: left; }
-
-        textarea {
-            resize: vertical;
-            min-height: 40px;
-        }
-
-        /* Footer */
         .footer {
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
         .disclaimer {
-            font-size: 8.5px;
-            color: #718096;
-            max-width: 60%;
+            max-width: 100%;
         }
 
         .signature-box {
-            width: 200px;
-            text-align: center;
-        }
-
-        .signature-line {
-            border-bottom: 1px solid #2d3748;
-            margin-bottom: 3px;
-            height: 25px;
-        }
-
-        .btn-submit {
-            background-color: #2b6cb0;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 12px;
             width: 100%;
+            margin-top: 15px;
         }
+    }
 
-        .btn-submit:hover {
-            background-color: #2c5282;
-        }
+    /* CONFIGURACIÓN PARA IMPRESIÓN / GENERACIÓN DE PDF */
+    @page {
+        size: letter portrait;
+        margin: 6mm;
+    }
 
-        @page {
-            size: letter portrait;
-            margin: 6mm;
-        }
-
-        @media print {
-            body { background: none !important; padding: 0 !important; margin: 0 !important; }
-            .container { box-shadow: none !important; border: none !important; padding: 0 !important; width: 100% !important; }
-            .btn-submit { display: none !important; }
-        }
-    </style>
+    @media print {
+        body { background: none !important; padding: 0 !important; margin: 0 !important; }
+        .container { box-shadow: none !important; border: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+        .btn-submit { display: none !important; }
+        .col-8  { width: calc(66.666% - 5.33px) !important; }
+        .col-7  { width: calc(58.333% - 5.33px) !important; }
+        .col-6  { width: calc(50% - 4px) !important; }
+        .col-5  { width: calc(41.666% - 5.33px) !important; }
+        .col-4  { width: calc(33.333% - 5.33px) !important; }
+        .col-3  { width: calc(25% - 6px) !important; }
+    }
+</style>
 </head>
 <body>
 
