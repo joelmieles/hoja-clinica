@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOJA CLÍNICA - Evaluación Integral del Paciente</title>
+    <!-- Librería para generación de PDF directo desde la web -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --border-color: #cbd5e0;
+            --text-color: #2d3748;
+            --accent-color: #3182ce;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #e2e8f0;
+            color: var(--text-color);
+            padding: 15px;
+            font-size: 11px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .logo-box {
+            width: 160px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            text-align: center;
+            font-size: 11px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .header-title {
+            text-align: center;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            letter-spacing: 1.5px;
+            font-weight: 800;
+        }
+
+        .header-title p {
+            font-size: 10px;
+            color: #4a5568;
+            font-weight: 600;
+            margin-top: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Layout Layout */
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .col-12 { width: 100%; }
+        .col-8 { width: calc(66.666% - 5.33px); }
+        .col-7 { width: calc(58.333% - 5.33px); }
+        .col-6 { width: calc(50% - 4px); }
+        .col-5 { width: calc(41.666% - 5.33px); }
+        .col-4 { width: calc(33.333% - 5.33px); }
+        .col-3 { width: calc(25% - 6px); }
+
+        /* Card Section Styling */
+        .section-card {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #fff;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-number {
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .section-body {
+            padding: 8px;
+            flex-grow: 1;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #4a5568;
+            white-space: nowrap;
+            font-size: 10px;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
+            width: 100%;
+            padding: 3px 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            font-size: 10px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        /* Scale EVA */
+        .eva-scale {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            background: #f7fafc;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .eva-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            font-size: 9px;
+        }
+
+        .eva-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .c-0 { background-color: #38a169; }
+        .c-2 { background-color: #68d391; }
+        .c-4 { background-color: #f6e05e; }
+        .c-6 { background-color: #ed8936; }
+        .c-8 { background-color: #e53e3e; }
+        .c-10 { background-color: #9b2c2c; }
+
+        /* Human Body Map & Checklist Layout */
+        .body-map-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .body-svg {
+            width: 90px;
+            height: 130px;
+            flex-shrink: 0;
+            border: 1px solid #edf2f7;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+
+        .checklist-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px 8px;
+            width: 100%;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 3px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        td.text-left { text-align: left; }
+
+        textarea {
+            resize: vertical;
+            min-height: 40px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .disclaimer {
+            font-size: 8.5px;
+            color: #718096;
+            max-width: 60%;
+        }
+
+        .signature-box {
+            width: 200px;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #2d3748;
+            margin-bottom: 3px;
+            height: 25px;
+        }
+
+        .btn-submit {
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background-color: #2c5282;
+        }
+
+        @page {
+            size: letter portrait;
+            margin: 6mm;
+        }
+
+        @media print {
+            body { background: none !important; padding: 0 !important; margin: 0 !important; }
+            .container { box-shadow: none !important; border: none !important; padding: 0 !important; width: 100% !important; }
+            .btn-submit { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="hoja-clinica">
+    <form id="clinicalForm">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo-box">
+                <img src="Orthogen.jpg" alt="Orthogen Integrativa" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div class="header-title">
+                <h1>HOJA CLÍNICA</h1>
+                <p>Evaluación Integral del Paciente</p>
+            </div>
+            <div class="logo-box">
+                <img src="ftt.jpg" alt="FISIO TOTAL TRAINING" style="max-width: 150%; max-height: 150%; object-fit: contain;">
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- 1. DATOS DEL PACIENTE -->
+            <div class="col-6">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">1</span>
+                        <span>DATOS DEL PACIENTE</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="form-group">
+                            <label>Nombre y Apellidos:</label>
+                            <input type="text" id="nombre_paciente" name="nombre">
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Edad:</label>
+                                <input type="number" name="edad">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>Sexo:</label>
+                                <div class="radio-group">
+                                    <label class="radio-item"><input type="radio" name="sexo" value="Masculino"> M</label>
+                                    <label class="radio-item"><input type="radio" name="sexo" value="Femenino"> F</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de nacimiento:</label>
+                            <input type="date" name="fecha_nacimiento">
+                        </div>
+                        <div class="form-group">
+                            <label>Ocupación:</label>
+                            <input type="text" name="ocupacion">
+                        </div>
+                        <div class="form-group">
+                            <label>Estado civil:</label>
+                            <input type="text" name="estado_civil">
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono:</label>
+                            <input type="text" name="telefono">
+                        </div>
+                        <div class="form-group">
+                            <label>Correo electrónico:</label>
+                            <input type="text" name="email">
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección:</label>
+                            <input type="text" name="direccion">
+                        </div>
+                        <div class="form-group">
+                            <label>Médico tratante:</label>
+                            <input type="text" name="medico_tratante">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 & 3. PROFESIONAL & DOLOR (EVA) -->
+            <div class="col-6">
+                <!-- 2. Profesional de Salud -->
+                <div class="section-card" style="margin-bottom: 8px; height: auto;">
+                    <div class="section-header">
+                        <span class="section-number">2</span>
+                        <span>PROFESIONAL DE SALUD</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="form-group">
+                            <label>Especialidad Integrativa:</label>
+                            <input type="text" name="especialidad">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. DOLOR (EVA) -->
+                <div class="section-card" style="height: auto;">
+                    <div class="section-header">
+                        <span class="section-number">3</span>
+                        <span>DOLOR (EVA)</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="eva-scale">
+                            <label class="eva-option"><span class="eva-color c-0"></span><input type="radio" name="eva" value="0">0</label>
+                            <label class="eva-option"><span class="eva-color c-0"></span><input type="radio" name="eva" value="1">1</label>
+                            <label class="eva-option"><span class="eva-color c-2"></span><input type="radio" name="eva" value="2">2</label>
+                            <label class="eva-option"><span class="eva-color c-2"></span><input type="radio" name="eva" value="3">3</label>
+                            <label class="eva-option"><span class="eva-color c-4"></span><input type="radio" name="eva" value="4">4</label>
+                            <label class="eva-option"><span class="eva-color c-4"></span><input type="radio" name="eva" value="5">5</label>
+                            <label class="eva-option"><span class="eva-color c-6"></span><input type="radio" name="eva" value="6">6</label>
+                            <label class="eva-option"><span class="eva-color c-6"></span><input type="radio" name="eva" value="7">7</label>
+                            <label class="eva-option"><span class="eva-color c-8"></span><input type="radio" name="eva" value="8">8</label>
+                            <label class="eva-option"><span class="eva-color c-8"></span><input type="radio" name="eva" value="9">9</label>
+                            <label class="eva-option"><span class="eva-color c-10"></span><input type="radio" name="eva" value="10">10</label>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 8.5px; color: #718096; margin-bottom: 6px;">
+                            <span>Sin dolor</span>
+                            <span>Leve</span>
+                            <span>Moderado</span>
+                            <span>Intenso</span>
+                            <span>Muy severo</span>
+                        </div>
+                        <div class="grid" style="gap: 6px;">
+                            <div class="col-6">
+                                <div class="form-group"><label>Localización:</label><input type="text" name="eva_localizacion"></div>
+                                <div class="form-group"><label>Irradiación:</label><input type="text" name="eva_irradiacion"></div>
+                                <div class="form-group"><label>Frecuencia:</label><input type="text" name="eva_frecuencia"></div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group"><label>Inicio:</label><input type="text" name="eva_inicio"></div>
+                                <div class="form-group"><label>Tipo:</label><input type="text" name="eva_tipo"></div>
+                                <div class="form-group"><label>Intensidad actual:</label><input type="text" name="eva_actual" placeholder="/10"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+   <!-- 4. LOCALIZACIÓN DEL DOLOR -->
+<div class="col-6">
+    <div class="section-card">
+        <div class="section-header">
+            <span class="section-number">4</span>
+            <span>LOCALIZACIÓN DEL DOLOR</span>
+        </div>
+        <div class="section-body">
+            <div class="body-map-container">
+                <!-- Imagen sustituida -->
+                <img src="Human.jpg" alt="Mapa corporal" class="body-svg" style="object-fit: contain;">
+                
+                <div class="checklist-2col">
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Cabeza/Cuello"> Cabeza / Cuello</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Hombro"> Hombro</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Brazo"> Brazo</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Codo"> Codo</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Muñeca"> Muñeca</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="C. Cervical"> C. Cervical</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="C. Dorsal"> C. Dorsal</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="C. Lumbar"> C. Lumbar</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Sacro/Pelvis"> Sacro / Pelvis</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Cadera"> Cadera</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Muslo"> Muslo</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Rodilla"> Rodilla</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Pierna"> Pierna</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Tobillo"> Tobillo</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Pie"> Pie</label>
+                    <label class="checkbox-item"><input type="checkbox" name="loc[]" value="Otro"> Otro</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- 5. ANTECEDENTES RELEVANTES -->
+            <div class="col-6">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">5</span>
+                        <span>ANTECEDENTES RELEVANTES</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="grid">
+                            <div class="col-6">
+                                <strong>Personales:</strong>
+                                <div class="checkbox-group" style="flex-direction: column; align-items: flex-start; margin-top: 3px;">
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Cirugías"> Cirugías</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Fracturas"> Fracturas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Enfermedades crónicas"> Enferm. crónicas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Lesiones previas"> Lesiones previas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Alergias"> Alergias</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Medicación actual"> Medicación actual</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_p[]" value="Hospitalizaciones"> Hospitalizaciones</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <strong>Familiares:</strong>
+                                <div class="checkbox-group" style="flex-direction: column; align-items: flex-start; margin-top: 3px;">
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_f[]" value="Cardiovasculares"> Cardiovasculares</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_f[]" value="Neurológicas"> Neurológicas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_f[]" value="Metabólicas"> Metabólicas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_f[]" value="Oncológicas"> Oncológicas</label>
+                                    <label class="checkbox-item"><input type="checkbox" name="ant_f[]" value="Osteomusculares"> Osteomusculares</label>
+                                </div>
+                            </div>
+                        </div>
+                        <hr style="margin: 6px 0; border: none; border-top: 1px solid #edf2f7;">
+                        <strong>Hábitos y estilo de vida:</strong>
+                        <div class="checkbox-group" style="margin-top: 3px;">
+                            <label class="checkbox-item"><input type="checkbox" name="habito[]" value="Actividad física"> Actividad física</label>
+                            <label class="checkbox-item"><input type="checkbox" name="habito[]" value="Sedentarismo"> Sedentarismo</label>
+                            <label class="checkbox-item"><input type="checkbox" name="habito[]" value="Fumador"> Fumador</label>
+                            <label class="checkbox-item"><input type="checkbox" name="habito[]" value="Alcohol"> Alcohol</label>
+                        </div>
+                        <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                            <span>Calidad de sueño:</span>
+                            <label class="radio-item"><input type="radio" name="sueno" value="Bajo"> Bajo</label>
+                            <label class="radio-item"><input type="radio" name="sueno" value="Medio"> Medio</label>
+                            <label class="radio-item"><input type="radio" name="sueno" value="Alto"> Alto</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. EXPLORACIÓN FÍSICA -->
+            <div class="col-5">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">6</span>
+                        <span>EXPLORACIÓN FÍSICA</span>
+                    </div>
+                    <div class="section-body" style="padding: 4px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">REGIÓN</th>
+                                    <th colspan="3">MOVILIDAD</th>
+                                    <th rowspan="2">DOLOR</th>
+                                </tr>
+                                <tr>
+                                    <th>NOR</th>
+                                    <th>DISM</th>
+                                    <th>AUM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-left">Cervical</td>
+                                    <td><input type="radio" name="mov_cervical" value="NOR"></td>
+                                    <td><input type="radio" name="mov_cervical" value="DISM"></td>
+                                    <td><input type="radio" name="mov_cervical" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_cervical"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Dorsal</td>
+                                    <td><input type="radio" name="mov_dorsal" value="NOR"></td>
+                                    <td><input type="radio" name="mov_dorsal" value="DISM"></td>
+                                    <td><input type="radio" name="mov_dorsal" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_dorsal"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Lumbar</td>
+                                    <td><input type="radio" name="mov_lumbar" value="NOR"></td>
+                                    <td><input type="radio" name="mov_lumbar" value="DISM"></td>
+                                    <td><input type="radio" name="mov_lumbar" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_lumbar"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Codo / Muñeca</td>
+                                    <td><input type="radio" name="mov_codo" value="NOR"></td>
+                                    <td><input type="radio" name="mov_codo" value="DISM"></td>
+                                    <td><input type="radio" name="mov_codo" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_codo"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Cadera</td>
+                                    <td><input type="radio" name="mov_cadera" value="NOR"></td>
+                                    <td><input type="radio" name="mov_cadera" value="DISM"></td>
+                                    <td><input type="radio" name="mov_cadera" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_cadera"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Rodilla</td>
+                                    <td><input type="radio" name="mov_rodilla" value="NOR"></td>
+                                    <td><input type="radio" name="mov_rodilla" value="DISM"></td>
+                                    <td><input type="radio" name="mov_rodilla" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_rodilla"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left">Tobillo</td>
+                                    <td><input type="radio" name="mov_tobillo" value="NOR"></td>
+                                    <td><input type="radio" name="mov_tobillo" value="DISM"></td>
+                                    <td><input type="radio" name="mov_tobillo" value="AUM"></td>
+                                    <td><input type="checkbox" name="dolor_tobillo"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. EVALUACIÓN NEUROLÓGICA -->
+            <div class="col-3">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">7</span>
+                        <span>EVALUACIÓN NEUROLÓGICA</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="checkbox-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Fuerza muscular"> Fuerza muscular</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Sensibilidad"> Sensibilidad</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Reflejos"> Reflejos</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Coordinación"> Coordinación</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Tono muscular"> Tono muscular</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Signos patológicos"> Signos patológicos</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Pares craneales"> Pares craneales</label>
+                            <label class="checkbox-item"><input type="checkbox" name="neuro[]" value="Otros"> Otros</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. PRUEBAS ESPECÍFICAS / ORTOPÉDICAS -->
+            <div class="col-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">8</span>
+                        <span>PRUEBAS ESPECÍFICAS</span>
+                    </div>
+                    <div class="section-body">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <input type="text" name="prueba1" placeholder="Prueba / Resultado 1">
+                            <input type="text" name="prueba2" placeholder="Prueba / Resultado 2">
+                            <input type="text" name="prueba3" placeholder="Prueba / Resultado 3">
+                            <input type="text" name="prueba4" placeholder="Prueba / Resultado 4">
+                        </div>
+                        <div style="margin-top: 5px;">
+                            <label style="font-weight: 600;">Observaciones:</label>
+                            <textarea name="pruebas_obs" rows="2" style="min-height:30px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. FACTORES QUE INFLUYEN -->
+            <div class="col-5">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">9</span>
+                        <span>FACTORES EN LA RECUPERACIÓN</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="checklist-2col">
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Dolor crónico"> Dolor crónico</label>
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Estrés / Ansiedad"> Estrés / Ansiedad</label>
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Mal descanso"> Mal descanso</label>
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Mala postura"> Mala postura</label>
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Sobrecarga"> Sobrecarga laboral</label>
+                            <label class="checkbox-item"><input type="checkbox" name="factor[]" value="Falta actividad"> Falta act. física</label>
+                        </div>
+                        <div style="margin-top: 6px;" class="form-group">
+                            <label>Apoyo familiar:</label>
+                            <label class="radio-item"><input type="radio" name="apoyo_fam" value="Si"> Sí</label>
+                            <label class="radio-item"><input type="radio" name="apoyo_fam" value="No"> No</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. DIAGNÓSTICO FISIOTERAPÉUTICO -->
+            <div class="col-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">10</span>
+                        <span>DIAGNÓSTICO FISIOTERAPÉUTICO</span>
+                    </div>
+                    <div class="section-body">
+                        <textarea name="diagnostico" style="height: 100%; min-height: 70px;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11. OBJETIVOS -->
+            <div class="col-3">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">11</span>
+                        <span>OBJETIVOS</span>
+                    </div>
+                    <div class="section-body">
+                        <div style="display: flex; flex-direction: column; gap: 3px;">
+                            <input type="text" name="obj1" placeholder="1.">
+                            <input type="text" name="obj2" placeholder="2.">
+                            <input type="text" name="obj3" placeholder="3.">
+                            <input type="text" name="obj4" placeholder="4.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12. PLAN DE TRATAMIENTO -->
+            <div class="col-5">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">12</span>
+                        <span>PLAN DE TRATAMIENTO</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="checklist-2col">
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Terapia manual"> Terapia manual</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Ejercicio terapéutico"> Ejercicio terapéutico</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Reeducación postural"> Reeducación postural</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Movilización articular"> Movilización articular</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Estiramientos"> Estiramientos</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Fortalecimiento"> Fortalecimiento</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Agentes físicos"> Agentes físicos</label>
+                            <label class="checkbox-item"><input type="checkbox" name="plan[]" value="Educación"> Educación paciente</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 13. PRONÓSTICO -->
+            <div class="col-3">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">13</span>
+                        <span>PRONÓSTICO</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="radio-group" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                            <label class="radio-item"><input type="radio" name="pronostico" value="Excelente"> Excelente</label>
+                            <label class="radio-item"><input type="radio" name="pronostico" value="Bueno"> Bueno</label>
+                            <label class="radio-item"><input type="radio" name="pronostico" value="Reservado"> Reservado</label>
+                            <label class="radio-item"><input type="radio" name="pronostico" value="Malo"> Malo</label>
+                        </div>
+                        <div style="margin-top: 4px;">
+                            <label style="font-size: 9.5px;">Observaciones:</label>
+                            <textarea name="pronostico_obs" rows="2" style="min-height:25px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 14. PRÓXIMA CITA / SEGUIMIENTO -->
+            <div class="col-4">
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-number">14</span>
+                        <span>PRÓXIMA CITA / SEGUIMIENTO</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="form-group">
+                            <label>Fecha:</label>
+                            <input type="date" name="prox_fecha">
+                        </div>
+                        <div class="form-group">
+                            <label>Hora:</label>
+                            <input type="time" name="prox_hora">
+                        </div>
+                        <div style="margin-top: 4px;">
+                            <label style="font-size: 9.5px;">Recomendaciones:</label>
+                            <textarea name="recomendaciones" rows="2" style="min-height:25px;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="disclaimer">
+                <strong>IMPORTANTE:</strong> Toda la información registrada es confidencial y será utilizada únicamente con fines clínicos.
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p style="font-size: 10px; color: #4a5568;">Firma del paciente / tutor</p>
+            </div>
+        </footer>
+
+        <button type="button" class="btn-submit" onclick="descargarPDF()">Guardar / Descargar PDF</button>
+    </form>
+</div>
+
+    <script>
+        function descargarPDF() {
+            const btn = document.querySelector('.btn-submit');
+            btn.style.display = 'none';
+
+            const elemento = document.getElementById('hoja-clinica');
+            const inputNombre = document.getElementById('nombre_paciente');
+            const nombrePaciente = inputNombre ? inputNombre.value.trim() : '';
+            const nombreArchivo = nombrePaciente ? `Hoja_Clinica_${nombrePaciente.replace(/\s+/g, '_')}.pdf` : 'Hoja_Clinica.pdf';
+
+            const originalBodyBg = document.body.style.backgroundColor;
+            const originalBodyPadding = document.body.style.padding;
+            
+            document.body.style.backgroundColor = '#ffffff';
+            document.body.style.padding = '0px';
+
+            const opciones = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     nombreArchivo,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: true,
+                    logging: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Ejecutar con captura de errores (.catch) para restaurar siempre el botón
+            html2pdf().set(opciones).from(elemento).save().then(() => {
+                document.body.style.backgroundColor = originalBodyBg;
+                document.body.style.padding = originalBodyPadding;
+                btn.style.display = 'block';
+            }).catch(err => {
+                console.error("Error generando el PDF:", err);
+                document.body.style.backgroundColor = originalBodyBg;
+                document.body.style.padding = originalBodyPadding;
+                btn.style.display = 'block';
+                alert("Ocurrió un error al generar el PDF. Verifica que el archivo HTML se esté ejecutando desde un servidor local (ej. Live Server).");
+            });
+        }
+    </script>
+
+</body>
+</html>
