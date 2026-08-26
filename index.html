@@ -859,50 +859,52 @@
 </div>
 
     <script>
-        function descargarPDF() {
-            const btn = document.querySelector('.btn-submit');
-            btn.style.display = 'none';
+async function descargarPDF() {
+    const btn = document.querySelector('.btn-submit');
+    btn.style.display = 'none';
 
-            const elemento = document.getElementById('hoja-clinica');
-            const inputNombre = document.getElementById('nombre_paciente');
-            const nombrePaciente = inputNombre ? inputNombre.value.trim() : '';
-            const nombreArchivo = nombrePaciente ? `Hoja_Clinica_${nombrePaciente.replace(/\s+/g, '_')}.pdf` : 'Hoja_Clinica.pdf';
+    const elemento = document.getElementById('hoja-clinica');
+    const inputNombre = document.getElementById('nombre_paciente');
+    const nombrePaciente = inputNombre ? inputNombre.value.trim() : '';
+    const nombreArchivo = nombrePaciente ? `Hoja_Clinica_${nombrePaciente.replace(/\s+/g, '_')}.pdf` : 'Hoja_Clinica.pdf';
 
-            const originalBodyBg = document.body.style.backgroundColor;
-            const originalBodyPadding = document.body.style.padding;
-            
-            document.body.style.backgroundColor = '#ffffff';
-            document.body.style.padding = '0px';
+    // 1. Esperar a que todas las imágenes del documento carguen completamente
+    const imagenes = Array.from(elemento.querySelectorAll('img'));
+    await Promise.all(imagenes.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve; // Previene que una imagen rota bloquee la ejecución
+        });
+    }));
 
-            const opciones = {
-                margin:       [0.2, 0.2, 0.2, 0.2],
-                filename:     nombreArchivo,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2, 
-                    useCORS: true, 
-                    allowTaint: true,
-                    logging: true,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-            };
+    // 2. Configurar html2pdf optimizado para entornos HTTPS / GitHub
+    const opciones = {
+        margin:       [0.2, 0.2, 0.2, 0.2],
+        filename:     nombreArchivo,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            allowTaint: false,
+            logging: false,
+            scrollX: 0,
+            scrollY: 0
+        },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
 
-            // Ejecutar con captura de errores (.catch) para restaurar siempre el botón
-            html2pdf().set(opciones).from(elemento).save().then(() => {
-                document.body.style.backgroundColor = originalBodyBg;
-                document.body.style.padding = originalBodyPadding;
-                btn.style.display = 'block';
-            }).catch(err => {
-                console.error("Error generando el PDF:", err);
-                document.body.style.backgroundColor = originalBodyBg;
-                document.body.style.padding = originalBodyPadding;
-                btn.style.display = 'block';
-                alert("Ocurrió un error al generar el PDF. Verifica que el archivo HTML se esté ejecutando desde un servidor local (ej. Live Server).");
-            });
-        }
+    // 3. Generar y descargar el PDF con restauración garantizada del botón
+    try {
+        await html2pdf().set(opciones).from(elemento).save();
+    } catch (err) {
+        console.error("Error al generar PDF:", err);
+        alert("Ocurrió un fallo al procesar el documento. Intenta nuevamente.");
+    } finally {
+        btn.style.display = 'block'; // Asegura que el botón vuelva a mostrarse siempre
+    }
+}
     </script>
 
 </body>
