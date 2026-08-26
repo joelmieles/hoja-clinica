@@ -868,41 +868,53 @@ async function descargarPDF() {
     const nombrePaciente = inputNombre ? inputNombre.value.trim() : '';
     const nombreArchivo = nombrePaciente ? `Hoja_Clinica_${nombrePaciente.replace(/\s+/g, '_')}.pdf` : 'Hoja_Clinica.pdf';
 
-    // 1. Esperar a que todas las imágenes del documento carguen completamente
+    // 1. Esperar carga de imágenes
     const imagenes = Array.from(elemento.querySelectorAll('img'));
     await Promise.all(imagenes.map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise((resolve) => {
             img.onload = resolve;
-            img.onerror = resolve; // Previene que una imagen rota bloquee la ejecución
+            img.onerror = resolve;
         });
     }));
 
-    // 2. Configurar html2pdf optimizado para entornos HTTPS / GitHub
     const opciones = {
         margin:       [0.2, 0.2, 0.2, 0.2],
         filename:     nombreArchivo,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 2, 
-            useCORS: true, 
-            allowTaint: false,
-            logging: false,
-            scrollX: 0,
-            scrollY: 0
-        },
+        html2canvas:  { scale: 2, useCORS: true, allowTaint: false, logging: false, scrollX: 0, scrollY: 0 },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    // 3. Generar y descargar el PDF con restauración garantizada del botón
     try {
-        await html2pdf().set(opciones).from(elemento).save();
+        // 2. Generar el PDF como un objeto Blob (archivo binario en memoria)
+        const pdfBlob = await html2pdf().set(opciones).from(elemento).output('blob');
+        const file = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
+
+        // 3. Opción para móviles: Compartir o guardar directamente
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: 'Hoja Clínica',
+                text: 'Adjunto Hoja Clínica en PDF'
+            });
+        } else {
+            // 4. Descarga forzada para navegadores móviles donde falla .save()
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = nombreArchivo;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        }
     } catch (err) {
-        console.error("Error al generar PDF:", err);
-        alert("Ocurrió un fallo al procesar el documento. Intenta nuevamente.");
+        console.error("Error al procesar el PDF:", err);
+        alert("Ocurrió un fallo al generar o guardar el PDF.");
     } finally {
-        btn.style.display = 'block'; // Asegura que el botón vuelva a mostrarse siempre
+        btn.style.display = 'block';
     }
 }
     </script>
