@@ -321,10 +321,37 @@
             padding: 10px;
         }
 
-        .header {
-            flex-direction: column;
-            text-align: center;
-            gap: 8px;
+         .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 0;
+        }
+        
+        .logo-box {
+            margin-bottom: 12px;
+        }
+        
+        .main-logo {
+            height: 90px; /* Ajusta la altura a tu gusto para controlar el tamaño */
+            width: auto;  /* Mantiene la proporción para que no se deforme */
+            object-fit: contain;
+        }
+        
+        .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #0b3b60; /* Ajusta al azul de tu diseño */
+            letter-spacing: 1px;
+        }
+        
+        .header-title p {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            color: #555;
+            text-transform: uppercase;
         }
 
         /* Fuerza a que todas las columnas de la grilla ocupen el 100% de ancho */
@@ -384,14 +411,11 @@
         <!-- HEADER -->
         <header class="header">
             <div class="logo-box">
-                <img src="Orthogen.png" alt="Orthogen Integrativa" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                <img src="Orthogen.png" alt="Orthogen Integrativa" class="main-logo">
             </div>
             <div class="header-title">
                 <h1>HOJA CLÍNICA</h1>
                 <p>Evaluación Integral del Paciente</p>
-            </div>
-            <div class="logo-box">
-                <img src="ftt.jpg" alt="FISIO TOTAL TRAINING" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
         </header>
 
